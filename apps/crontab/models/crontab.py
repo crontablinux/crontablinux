@@ -23,11 +23,27 @@ class Crontab(models.Model):
     is_deleted = models.BooleanField('Is deleted', default=False)
 
     class Meta:
-        verbose_name = _('crontab')
-        verbose_name_plural = _('crontabs')
+        verbose_name = _('Crontab')
+        verbose_name_plural = _('Crontabs')
         ordering = ['month_of_year', 'day_of_month', 'day_of_week', 'hour', 'minute']
 
     def __str__(self):
         return '{0} {1} {2} {3} {4} (m/h/d/dM/MY)'.format(cronexp(self.minute), cronexp(self.hour),
                                                           cronexp(self.day_of_week), cronexp(self.day_of_month),
                                                           cronexp(self.month_of_year))
+
+
+class CrontabAsset(models.Model):
+    """
+    用户角色
+    """
+    asset_id = models.IntegerField('Asset id')
+    crontab_id = models.IntegerField('Crontab id')
+
+    gmt_created = models.DateTimeField('Date created', auto_now_add=True)
+    gmt_modified = models.DateTimeField('Date updated', auto_now=True)
+    is_deleted = models.BooleanField('Is deleted', default=False)
+
+    class Meta:
+        verbose_name = _('Crontab Asset')
+        verbose_name_plural = _('Crontabs Asset')
