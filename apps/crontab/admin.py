@@ -3,3 +3,4 @@ from apps.crontab import models
 
 # Register your models here.
 admin.site.register(models.Crontab)
+admin.site.register(models.CrontabAsset)

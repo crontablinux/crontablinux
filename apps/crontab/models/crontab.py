@@ -1,6 +1,12 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from apps.ops.models import Adhoc
+
+
+class CrontabError(Exception):
+    pass
+
 
 def cronexp(field):
     """Representation of cron expression."""
@@ -11,8 +17,8 @@ def cronexp(field):
 class Crontab(models.Model):
     name = models.CharField('CrontabName', max_length=50, help_text='CrontabName', null=False)
     job = models.CharField('Job', max_length=50, help_text='Job', null=False)
-    asset_id = models.IntegerField(_('Asset id'), null=False)
     port = models.IntegerField(default=22, verbose_name=_('Port'))
+    ansible_id = models.IntegerField('Ansible id', default=0)
     minute = models.CharField(_('Minute'), max_length=60 * 4, default='*')
     hour = models.CharField(_('Hour'), max_length=24 * 4, default='*')
     day_of_week = models.CharField(_('Day of week'), max_length=64, default='*')
@@ -32,10 +38,42 @@ class Crontab(models.Model):
                                                           cronexp(self.day_of_week), cronexp(self.day_of_month),
                                                           cronexp(self.month_of_year))
 
+    @property
+    def ansible(self):
+        if not Adhoc.objects.filter(pk=self.ansible_id).exists() or self.is_deleted:
+            asset_list = [i.asset_id for i in CrontabAsset.objects.filter(crontab_id=self.id)]
+            if not asset_list:
+                self.ansible_id = 0
+                return
+
+            if self.is_deleted:
+                state = 'absent'
+            else:
+                state = 'present'
+            tasks = [{'name': self.name,
+                     'action': {'module': 'cron', 'args': 'minute={} hour={} day={} weekday={} month={} name="{}" '
+                                                          'job="{}" state={}'.format(self.minute, self.hour,
+                                                                                     self.day_of_week, self.day_of_month
+                                                                                     , self.month_of_year, self.name,
+                                                                                     self.job, state)}}]
+            new_ansible = Adhoc(pattern='all', tasks=tasks, hosts=asset_list)
+            new_ansible.save()
+            self.ansible_id = new_ansible.id
+            self.save()
+            return new_ansible
+        ansible = Adhoc.objects.get(id=self.ansible_id)
+        return ansible
+
+    def run(self):
+        if self.ansible:
+            return self.ansible.run()
+        else:
+            return {'error': 'No ansible'}
+
 
 class CrontabAsset(models.Model):
     """
-    用户角色
+    资产计划任务
     """
     asset_id = models.IntegerField('Asset id')
     crontab_id = models.IntegerField('Crontab id')

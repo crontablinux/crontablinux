@@ -14,7 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+PROJECT_DIR = BASE_DIR
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.asset',
-    'apps.crontab'
+    'apps.crontab',
+    'apps.ops'
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,32 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# Celery Setting
+REDIS_HOST = "127.0.0.1"
+REDIS_PORT = 6379
+REDIS_DB = 1
+REDIS_PWD = ""
+CELERY_BROKERS_DB = 6
+CELERY_BACKEND_DB = 7
+
+# Dump all celery log to here
+CELERY_LOG_DIR = os.path.join(PROJECT_DIR, 'data', 'celery')
+
+CELERY_BROKER_URL = "redis://:%s@%s:%d/%d" % (REDIS_PWD, REDIS_HOST, REDIS_PORT, CELERY_BROKERS_DB)
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_RESULT_BACKEND = "redis://:%s@%s:%d/%d" % (REDIS_PWD, REDIS_HOST, REDIS_PORT, CELERY_BACKEND_DB)
+CELERY_ACCEPT_CONTENT = ['json', 'pickle']
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+CELERY_RESULT_EXPIRES = 3600
+# CELERY_WORKER_LOG_FORMAT = '%(asctime)s [%(module)s %(levelname)s] %(message)s'
+CELERY_WORKER_LOG_FORMAT = '%(message)s'
+# CELERY_WORKER_TASK_LOG_FORMAT = '%(asctime)s [%(module)s %(levelname)s] %(message)s'
+CELERY_WORKER_TASK_LOG_FORMAT = '%(message)s'
+# CELERY_WORKER_LOG_FORMAT = '%(asctime)s [%(module)s %(levelname)s] %(message)s'
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_REDIRECT_STDOUTS = True
+CELERY_REDIRECT_STDOUTS_LEVEL = "INFO"
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
