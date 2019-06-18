@@ -17,7 +17,6 @@ def cronexp(field):
 class Crontab(models.Model):
     name = models.CharField('CrontabName', max_length=50, help_text='CrontabName', null=False)
     job = models.CharField('Job', max_length=50, help_text='Job', null=False)
-    port = models.IntegerField(default=22, verbose_name=_('Port'))
     ansible_id = models.IntegerField('Ansible id', default=0)
     minute = models.CharField(_('Minute'), max_length=60 * 4, default='*')
     hour = models.CharField(_('Hour'), max_length=24 * 4, default='*')
@@ -44,6 +43,7 @@ class Crontab(models.Model):
             asset_list = [i.asset_id for i in CrontabAsset.objects.filter(crontab_id=self.id)]
             if not asset_list:
                 self.ansible_id = 0
+                # msg = 'Crontab dont related'
                 return
 
             if self.is_deleted:
@@ -53,7 +53,7 @@ class Crontab(models.Model):
             tasks = [{'name': self.name,
                      'action': {'module': 'cron', 'args': 'minute={} hour={} day={} weekday={} month={} name="{}" '
                                                           'job="{}" state={}'.format(self.minute, self.hour,
-                                                                                     self.day_of_week, self.day_of_month
+                                                                                     self.day_of_month, self.day_of_week
                                                                                      , self.month_of_year, self.name,
                                                                                      self.job, state)}}]
             new_ansible = Adhoc(pattern='all', tasks=tasks, hosts=asset_list)

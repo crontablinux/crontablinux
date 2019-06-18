@@ -16,4 +16,7 @@ class AssetUser(models.Model):
 
     @password.setter
     def password(self, password_raw):
-        raise AttributeError("Using set_auth do that")
+        if password_raw:
+            self._password = password_raw
+        else:
+            raise SyntaxError("Password shouldn`t be empty")
