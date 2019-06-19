@@ -9,5 +9,9 @@ class AssetUserAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
-admin.site.register(models.Asset)
+class AssetAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'ip', 'user_id')
+
+
+admin.site.register(models.Asset, AssetAdmin)
 admin.site.register(models.AssetUser, AssetUserAdmin)

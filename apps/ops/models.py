@@ -14,6 +14,7 @@ class Adhoc(models.Model):
         pattern: Even if we set _hosts, We only use that to make inventory,
                  We also can set `patter` to run task on match hosts
     """
+    name = models.CharField(max_length=128, verbose_name=_('Name'), db_index=True, unique=True)
     _tasks = models.TextField(verbose_name=_('Tasks'))
     pattern = models.CharField(max_length=64, default='{}', verbose_name=_('Pattern'))
     _hosts = models.TextField(blank=True, verbose_name=_('Hosts'))

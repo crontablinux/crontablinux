@@ -14,12 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from apps.asset.views import AssetListView, AssetView, AssetUserView, AssetUserListView
+from apps.asset.views import AssetListView, AssetView, AssetUserView, AssetUserListView, AssetCrons, AssetCron
 
 
 urlpatterns = [
     path('', AssetListView.as_view()),
     path('/<int:asset_id>', AssetView.as_view()),
+    path('/<int:asset_id>/cron', AssetCrons.as_view()),
+    path('/<int:asset_id>/cron/<int:cron_id>', AssetCron.as_view()),
 
     path('/users', AssetUserListView.as_view()),
     path('/users/<int:user_id>', AssetUserView.as_view()),

@@ -228,3 +228,50 @@ password | varchar | 否 | 用户密码
     }
 }
 ```
+
+# 更新资产cron
+### URL
+api/v1.0/assets/{asset_id}/cron
+### method
+get
+### 请求参数
+参数名 | 类型 | 必填 | 说明
+---|---|---|---
+asset_id| int| 是| 资产id
+
+### 返回数据
+```
+{
+    "code": 200,
+    "data": {
+        "username": "root2",
+        "is_deleted": false,
+        "gmt_created": "2019-06-17 02:38:08",
+        "gmt_modified": "2019-06-18 07:06:57"
+    }
+}
+```
+
+# 更新资产单个cron
+### URL
+api/v1.0/assets/{asset_id}/cron/<int:cron_id>
+### method
+get
+### 请求参数
+参数名 | 类型 | 必填 | 说明
+---|---|---|---
+asset_id| int| 是| 资产id
+cron_id| int| 是| cron id
+
+### 返回数据
+```
+{
+    "code": 200,
+    "data": {
+        "username": "root2",
+        "is_deleted": false,
+        "gmt_created": "2019-06-17 02:38:08",
+        "gmt_modified": "2019-06-18 07:06:57"
+    }
+}
+```

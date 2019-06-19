@@ -1,10 +1,14 @@
 import json
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 from apps.asset.models import Asset, AssetUser
+from apps.crontab.models import Crontab
 from apps.common.format_response import api_response
+
+from tasks import update_asset_crontabs_tasks
 # Create your views here.
 
 
@@ -123,12 +127,7 @@ class AssetView(View):
         asset_id = kwargs.get('asset_id')
         msg = ''
 
-        asset_query = Asset.objects.filter(pk=asset_id)
-        if not asset_query.exists():
-            msg = 'asset not exists'
-            return api_response(code=201, msg=msg, data={})
-
-        asset_obj = asset_query[0]
+        asset_obj = get_object_or_404(Asset, pk=asset_id)
         user_id = asset_obj.user_id
 
         user_obj = AssetUser.objects.get(pk=user_id)
@@ -151,12 +150,7 @@ class AssetView(View):
         request_data_dict = json.loads(json_str)
         asset_id = kwargs.get('asset_id')
 
-        asset_query = Asset.objects.filter(pk=asset_id)
-        if not asset_query.exists():
-            msg = 'asset not exists'
-            return api_response(code=201, msg=msg, data={})
-
-        asset_obj = asset_query[0]
+        asset_obj = get_object_or_404(Asset, pk=asset_id)
 
         name = request_data_dict.get('hostname', '')
         ip = request_data_dict.get('ip', '')
@@ -180,4 +174,35 @@ class AssetView(View):
             asset_obj.save()
 
         data = dict(hostname=asset_obj.name, ip=asset_obj.ip, user_id=asset_obj.user_id, port=asset_obj.port)
+        return api_response(code=200, data=data)
+
+
+class AssetCrons(View):
+    def get(self, request, *args, **kwargs):
+        """
+        Update Asset Cron
+        """
+        asset_id = kwargs.get('asset_id')
+        asset_obj = get_object_or_404(Asset, pk=asset_id)
+        asset_name = asset_obj.name
+        task_name = "{} update crontabs".format(asset_name)
+        task = update_asset_crontabs_tasks.delay(host_id=asset_id, tasks_name=task_name)
+        data = {"task": task.id}
+        return api_response(code=200, data=data)
+
+
+class AssetCron(View):
+    def get(self, request, *args, **kwargs):
+        """
+        Update Asset Cron
+        """
+        asset_id = kwargs.get('asset_id')
+        cron_id = kwargs.get('cron_id')
+        asset_obj = get_object_or_404(Asset, pk=asset_id)
+        cron_obj = get_object_or_404(Crontab, pk=cron_id)
+        asset_name = asset_obj.name
+        cron_name = cron_obj.name
+        task_name = "{} update crontab {}".format(asset_name, cron_name)
+        task = update_asset_crontabs_tasks.delay(host_id=asset_id, tasks_name=task_name, cron_id=cron_id)
+        data = {"task": task.id}
         return api_response(code=200, data=data)

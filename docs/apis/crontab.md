@@ -155,3 +155,112 @@ week | varchar | no | 周
     }
 }
 ```
+
+# 获取CrontabAsset列表
+### URL
+/api/v1.0/cron/assets
+### method
+GET
+### 请求参数
+参数名 | 类型 | 必填 | 说明
+---|---|---|---
+is_deleted | bool | 否 | 是否删除
+asset_id | int | 否 | 资产id
+crontab_id | int | 否 | 计划任务id
+create_start | varchar | 否 | 创建时间起
+create_end | varchar | 否 | 创建时间止
+reverse | varchar | 否 | 是否按照创建时间倒序，0或者1
+page| int | 否 | 页码，默认1
+per_page| int | 否 | 每页个数，默认10
+
+### 返回数据
+```
+{
+    "code": 200,
+    "data": {
+        "value": [
+            {
+                "id": 4,
+                "asset_id": 3,
+                "crontab_id": 1,
+                "is_deleted": false,
+                "gmt_created": "2019-06-19 03:43:52",
+                "gmt_modified": "2019-06-19 03:43:52"
+            }
+        ],
+        "per_page": 1,
+        "page": 1,
+        "total": 4
+    }
+}
+```
+
+# 新建CrontabAsset
+### URL
+/api/v1.0/cron/assets
+### method
+POST
+### 请求参数
+参数名 | 类型 | 必填 | 说明
+---|---|---|---
+asset_id | int | 否 | 资产id
+crontab_id | int | 否 | 计划任务id
+### 返回数据
+```
+{
+    "code": 200,
+    "data": {
+        "asset_id": 5,
+        "crontab_id": 1
+    }
+}
+```
+
+# 获取CrontabAsset详情
+### URL
+/api/v1.0/cron/assets/{cron_asset_id}
+
+### method
+GET
+
+### 请求参数
+参数名 | 类型 | 必填 | 说明
+---|---|---|---
+cron_asset_id | int | 是 | 资产计划任务关联id
+
+### 返回数据
+```
+{
+    "code": 200,
+    "data": {
+        "asset_id": 5,
+        "crontab_id": 1
+    }
+}
+```
+
+# 处理CrontabAsset
+### URL
+api/v1.0/cron/assets/{asset_id}
+### method
+patch
+### 请求参数
+参数名 | 类型 | 必填 | 说明
+---|---|---|---
+asset_id | int | 否 | 资产id
+crontab_id | int | 否 | 计划任务id
+
+### 返回数据
+```
+{
+    "code": 200,
+    "data": {
+        "id": 1,
+        "asset_id": 1,
+        "crontab_id": 1,
+        "is_deleted": false,
+        "gmt_created": "2019-06-17 05:35:53",
+        "gmt_modified": "2019-06-19 05:43:47"
+    }
+}
+```

@@ -14,10 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from apps.crontab.views import CronListView, CronView
+from apps.crontab.views import CronListView, CronView, CronAssetListView, CronAssetView
 
 
 urlpatterns = [
     path('', CronListView.as_view()),
     path('/<int:cron_id>', CronView.as_view()),
+
+    path('/assets', CronAssetListView.as_view()),
+    path('/assets/<int:cron_asset_id>', CronAssetView.as_view()),
+
 ]
