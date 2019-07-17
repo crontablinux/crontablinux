@@ -9,10 +9,10 @@ services:
         command: ["/usr/bin/python3", "cron.py", "start", "gunicorn"]
         environment:
             - DB_NAME=crontab
-            - DB_HOST=10.20.3.101
+            - DB_HOST=127.0.0.1
             - DB_PORT=3306
-            - DB_USER=ops
-            - DB_PASSWORD=ops
+            - DB_USER=root
+            - DB_PASSWORD=root
             - HTTP_LISTEN_PORT=8000
         volumes:
             - crontab-linux:/ops/promethues-export
