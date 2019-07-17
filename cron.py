@@ -43,7 +43,7 @@ DAEMON = False
 def check_database_connection():
     for i in range(60):
         print("Check database connection ...")
-        code = subprocess.call("python manage.py showmigrations", shell=True)
+        code = subprocess.call("/usr/bin/python3 manage.py showmigrations", shell=True)
         if code == 0:
             print("Database connect success")
             return
@@ -55,7 +55,7 @@ def check_database_connection():
 def make_migrations():
     print("Check database structure change ...")
     print("Migrate model change to database ...")
-    subprocess.call('python3 manage.py migrate', shell=True)
+    subprocess.call('/usr/bin/python3 manage.py migrate', shell=True)
 
 
 def prepare():
