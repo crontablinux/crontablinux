@@ -54,6 +54,7 @@ def check_database_connection():
 
 def make_migrations():
     print("Check database structure change ...")
+    subprocess.call('/usr/bin/python3 manage.py makemigrations', shell=True)
     print("Migrate model change to database ...")
     subprocess.call('/usr/bin/python3 manage.py migrate', shell=True)
 
