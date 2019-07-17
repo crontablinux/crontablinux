@@ -19,6 +19,7 @@ class CronListView(View):
         request_data = request.GET
         name = request_data.get('crontab_name', '')
         job = request_data.get('job', '')
+        asset_id = request_data.get('asset_id', '')
         create_start = request_data.get('create_start', '')
         create_end = request_data.get('create_end', '')
         reverse = int(request_data.get('reverse', 1))
@@ -30,19 +31,27 @@ class CronListView(View):
         if name:
             query_params &= Q(name__startwith=name)
         if job:
-            query_params &= Q(ip=job)
+            query_params &= Q(job=job)
         if create_start:
             query_params &= Q(gmt_created__gte=create_start)
         if create_end:
             query_params &= Q(gmt_created__lte=create_end)
+        if asset_id:
+            id = int(asset_id.replace('!', ''))
+            crontab_ids = [i.crontab_id for i in CrontabAsset.objects.filter(asset_id=id)]
+            if asset_id.startswith('!'):
+                query_params &= ~Q(id__in=crontab_ids)
+            else:
+                query_params &= Q(id__in=crontab_ids)
 
         if reverse:
             order_by_str = '-gmt_created'
         else:
             order_by_str = 'gmt_created'
 
-        ansible_objects = Crontab.objects.filter(query_params).order_by(order_by_str)
-        paginator = Paginator(ansible_objects, per_page)
+        crontab_objects = Crontab.objects.filter(query_params).order_by(order_by_str)
+        cron_count = crontab_objects.count() if crontab_objects.count() else 1
+        paginator = Paginator(crontab_objects, per_page if per_page != 0 else cron_count)
 
         try:
             cron_paginator = paginator.page(page)
@@ -61,11 +70,12 @@ class CronListView(View):
                                                  job=cron_result_object.job,
                                                  minute=cron_result_object.minute,
                                                  hour=cron_result_object.hour,
-                                                 day=cron_result_object.day_of_week,
-                                                 month=cron_result_object.day_of_month,
-                                                 month_of_year=cron_result_object.month_of_year,
-                                                 gmt_created = str(cron_result_object.gmt_created)[:19],
-                                                 gmt_modified = str(cron_result_object.gmt_modified)[:19],
+                                                 day=cron_result_object.day_of_month,
+                                                 month=cron_result_object.month_of_year,
+                                                 week=cron_result_object.day_of_week,
+                                                 asset_id=asset_id,
+                                                 gmt_created=str(cron_result_object.gmt_created)[:19],
+                                                 gmt_modified=str(cron_result_object.gmt_modified)[:19],
                                                  ))
         data = dict(value=cron_result_restful_list, per_page=per_page, page=page, total=paginator.count)
         if msg:
@@ -93,7 +103,7 @@ class CronListView(View):
         week = request_data_dict.get('week', '*')
 
         if not name:
-            msg = 'pls input hostname'
+            msg = 'pls input crontab_name'
         elif not job:
             msg = 'pls input job'
         elif Crontab.objects.filter(name=name, is_deleted=False).exists():
@@ -170,12 +180,13 @@ class CronView(View):
         day = request_data_dict.get('day', '*')
         month = request_data_dict.get('month', '*')
         week = request_data_dict.get('week', '*')
+        is_deleted = request_data_dict.get('is_deleted', False)
 
         if name and cron_obj.name != name:
             cron_obj.name = name
             update = True
         if job and cron_obj.job != job:
-            cron_obj.ip = job
+            cron_obj.job = job
             update = True
         if minute and cron_obj.minute != minute:
             cron_obj.minute = minute
@@ -191,6 +202,9 @@ class CronView(View):
             update = True
         if week and cron_obj.day_of_week != week:
             cron_obj.day_of_week = week
+            update = True
+        if cron_obj.is_deleted != is_deleted:
+            cron_obj.is_deleted = is_deleted
             update = True
 
         if update:
@@ -238,7 +252,8 @@ class CronAssetListView(View):
             order_by_str = 'gmt_created'
 
         cronasset_objects = CrontabAsset.objects.filter(query_params).order_by(order_by_str)
-        paginator = Paginator(cronasset_objects, per_page)
+        cron_asset_count = cronasset_objects.count() if cronasset_objects.count() else 1
+        paginator = Paginator(cronasset_objects, per_page if per_page != 0 else cron_asset_count)
 
         try:
             cronasset_paginator = paginator.page(page)
@@ -380,3 +395,26 @@ class CronAssetView(View):
 
         return api_response(code=200, data=data)
 
+
+class ChartListView(View):
+    def get(self, request, *args, **kwargs):
+        request_data = request.GET
+        msg = ''
+        data = [100, 40, 78, 10, 30, 48]
+        return api_response(code=200, msg=msg, data=data)
+
+
+class FormListView(View):
+    def get(self, request, *args, **kwargs):
+        request_data = request.GET
+        msg = ''
+        data = "ok"
+        return api_response(code=200, msg=msg, data=data)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Create Cron Asset
+        """
+        data = "ok"
+
+        return api_response(code=200, data=data)

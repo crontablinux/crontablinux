@@ -1,0 +1,2 @@
+brew install libtiff libjpeg webp little-cms2 openssl
+env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" pip install -r requirement.txt

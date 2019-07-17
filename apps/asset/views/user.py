@@ -1,4 +1,5 @@
 import json
+import logging
 from django.shortcuts import render
 from django.views import View
 from django.db.models import Q
@@ -15,7 +16,7 @@ class AssetUserListView(View):
         :return:
         """
         request_data = request.GET
-        name = request_data.get('username', '')
+        name = request_data.get('name', '')
         create_start = request_data.get('create_start', '')
         create_end = request_data.get('create_end', '')
         reverse = int(request_data.get('reverse', 1))
@@ -37,7 +38,8 @@ class AssetUserListView(View):
             order_by_str = 'gmt_created'
 
         user_objects = AssetUser.objects.filter(query_params).order_by(order_by_str)
-        paginator = Paginator(user_objects, per_page)
+        user_count = user_objects.count() if user_objects.count() else 1
+        paginator = Paginator(user_objects, per_page if per_page != 0 else user_count)
 
         try:
             user_paginator = paginator.page(page)
@@ -55,6 +57,7 @@ class AssetUserListView(View):
                                                  name=user_result_object.name,
                                                  gmt_created = str(user_result_object.gmt_created)[:19],
                                                  gmt_modified = str(user_result_object.gmt_modified)[:19],
+                                                 password="***"
                                                  ))
         data = dict(value=user_result_restful_list, per_page=per_page, page=page, total=paginator.count)
         if msg:
@@ -73,11 +76,11 @@ class AssetUserListView(View):
         request_data_dict = json.loads(json_str)
 
         msg = ''
-        name = request_data_dict.get('hostname', '')
+        name = request_data_dict.get('name', '')
         pwd = request_data_dict.get('password', '')
 
         if not name:
-            msg = 'pls input hostname'
+            msg = 'pls input username'
         elif not pwd:
             msg = 'pls input password'
         elif AssetUser.objects.filter(name=name, is_deleted=False).exists():
@@ -133,14 +136,19 @@ class AssetUserView(View):
 
         user_obj = user_query[0]
 
-        name = request_data_dict.get('username', '')
+        name = request_data_dict.get('hostname', '')
         pwd = request_data_dict.get('password', '')
+        is_deleted = request_data_dict.get('is_deleted', False)
 
+        print("Patch data {}".format(request_data_dict))
         if name and user_obj.name != name:
             user_obj.name = name
             update = True
         if pwd and user_obj.password != pwd:
             user_obj.password = pwd
+            update = True
+        if user_obj.is_deleted != is_deleted:
+            user_obj.is_deleted = is_deleted
             update = True
 
         if update:

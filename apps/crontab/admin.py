@@ -7,7 +7,7 @@ class CrontabAdmin(admin.ModelAdmin):
 
 
 class CrontabAssetAdmin(admin.ModelAdmin):
-    list_display = ('id', 'asset_id', 'crontab_id')
+    list_display = ('id', 'asset_id', 'crontab_id', 'status')
 
 
 # Register your models here.

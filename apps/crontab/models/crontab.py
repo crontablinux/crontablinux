@@ -79,8 +79,14 @@ class CrontabAsset(models.Model):
     """
     资产计划任务
     """
+    CRONTAB_ASSET_CHOICES = (
+        (1, 'PUBLISH'),
+        (2, 'CANCEL'),
+        (3, 'WAITING'),
+    )
     asset_id = models.IntegerField('Asset id')
     crontab_id = models.IntegerField('Crontab id')
+    status = models.SmallIntegerField(choices=CRONTAB_ASSET_CHOICES, default=2, verbose_name='状态')
 
     gmt_created = models.DateTimeField('Date created', auto_now_add=True)
     gmt_modified = models.DateTimeField('Date updated', auto_now=True)

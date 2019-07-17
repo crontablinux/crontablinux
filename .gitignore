@@ -9,3 +9,5 @@ media/workflow_script/*.*
 !media/workflow_script/demo_script.py
 media/notice_script/*.*
 data/*
+db.sqlite3
+config.py

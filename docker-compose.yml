@@ -1,0 +1,45 @@
+version: '2'
+
+services:
+    crontab-linux:
+        container_name: crontab-linux
+        build: .
+        restart: unless-stopped
+        network_mode: host
+        command: ["/usr/bin/python3", "cron.py", "start", "gunicorn"]
+        environment:
+            - DB_NAME=crontab
+            - DB_HOST=10.20.3.101
+            - DB_PORT=3306
+            - DB_USER=ops
+            - DB_PASSWORD=ops
+            - HTTP_LISTEN_PORT=8000
+        volumes:
+            - crontab-linux:/ops/promethues-export
+#            - /etc/localtime:/etc/localtime:ro
+        logging:
+            options:
+                max-size: "10m"
+                max-file: "10"
+        ulimits:
+            nproc: 65536
+            nofile: 65536
+
+    crontab-linux-celery:
+        container_name: crontab-linux-celery
+        build: .
+        restart: unless-stopped
+        network_mode: host
+        command: ["/usr/bin/python3", "cron.py", "start", "celery"]
+        volumes_from:
+            - crontab-linux
+
+    crontab-linux-redis:
+        container_name: crontab-linux-redis
+        image: redis
+        network_mode: host
+        command:
+          redis-server
+
+volumes:
+    crontab-linux:

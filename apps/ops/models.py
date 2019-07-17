@@ -17,7 +17,7 @@ class Adhoc(models.Model):
     name = models.CharField(max_length=128, verbose_name=_('Name'), db_index=True, unique=True)
     _tasks = models.TextField(verbose_name=_('Tasks'))
     pattern = models.CharField(max_length=64, default='{}', verbose_name=_('Pattern'))
-    _hosts = models.TextField(blank=True, verbose_name=_('Hosts'))
+    _hosts = models.TextField(max_length=255, blank=True, verbose_name=_('Hosts'))
     gmt_created = models.DateTimeField('Date created', auto_now_add=True)
     gmt_modified = models.DateTimeField('Date updated', auto_now=True)
     is_deleted = models.BooleanField('Is deleted', default=False)

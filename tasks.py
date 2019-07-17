@@ -32,7 +32,7 @@ def test_task(a, b):
 
 
 @app.task
-def update_asset_crontabs_tasks(host_id: int, cron_id: int=0, pattern: str='all', tasks_name: str=None):
+def update_asset_crontabs_tasks(host_id: int, cron_id: int=0, pattern: str='all', status: str='', tasks_name: str=None):
     """
     :param host_obj: Asset
     :param tasks_name:
@@ -51,7 +51,7 @@ def update_asset_crontabs_tasks(host_id: int, cron_id: int=0, pattern: str='all'
     query_params = Q(asset_id=host_id)
 
     if cron_id != 0:
-        query_params &= Q(cron_id=cron_id)
+        query_params &= Q(crontab_id=cron_id)
 
     crontab_asset_query = CrontabAsset.objects.filter(query_params)
 
@@ -77,7 +77,7 @@ def update_asset_crontabs_tasks(host_id: int, cron_id: int=0, pattern: str='all'
         crontab_id = obj.crontab_id
         crontab_obj = crontab_query.get(id=crontab_id)
 
-        if crontab_obj.is_deleted or obj.is_deleted:
+        if crontab_obj.is_deleted or obj.is_deleted or status == 2:
             state = 'absent'
         else:
             state = 'present'
@@ -98,6 +98,17 @@ def update_asset_crontabs_tasks(host_id: int, cron_id: int=0, pattern: str='all'
 
     ansible_obj = update_or_create_ansible_task(pattern=pattern, tasks=tasks, hosts=hosts, name=tasks_name)
     results_raw, results_summary = ansible_obj.run()
+    if status == 1 and results_summary['success']:
+        for i in range(crontab_asset_query.count()):
+            obj = crontab_asset_query[i]
+            obj.status = status
+            obj.save()
+    else:
+        for i in range(crontab_asset_query.count()):
+            obj = crontab_asset_query[i]
+            obj.status = 2
+            obj.save()
+
     return results_raw, results_summary
 
 

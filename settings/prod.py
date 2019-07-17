@@ -11,6 +11,14 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+try:
+    from config import Config as CONFIG
+except ImportError:
+    msg = """
+        Error: No config file found.
+        You can run `cp config_example.py config.py`, and edit it
+    """
+    raise ImportError(msg)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,7 +28,7 @@ PROJECT_DIR = BASE_DIR
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'v3c$63l=r0cnt=p=n-1s0_1!%$c)251^dc=oq#ng#!*0c38+re'
+SECRET_KEY = CONFIG.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -78,10 +86,22 @@ WSGI_APPLICATION = 'crontablinux.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.{}'.format(CONFIG.DB_ENGINE),
+        'NAME': CONFIG.DB_NAME,
+        'HOST': CONFIG.DB_HOST,
+        'PORT': CONFIG.DB_PORT,
+        'USER': CONFIG.DB_USER,
+        'PASSWORD': CONFIG.DB_PASSWORD,
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -126,10 +146,10 @@ STATIC_URL = '/static/'
 
 
 # Celery Setting
-REDIS_HOST = "127.0.0.1"
-REDIS_PORT = 6379
+REDIS_HOST = CONFIG.REDIS_HOST
+REDIS_PORT = CONFIG.REDIS_PORT
 REDIS_DB = 1
-REDIS_PWD = ""
+REDIS_PWD = CONFIG.REDIS_PWD
 CELERY_BROKERS_DB = 6
 CELERY_BACKEND_DB = 7
 
