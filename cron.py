@@ -40,6 +40,29 @@ WORKERS = 4
 DAEMON = False
 
 
+def check_database_connection():
+    for i in range(60):
+        print("Check database connection ...")
+        code = subprocess.call("python manage.py showmigrations", shell=True)
+        if code == 0:
+            print("Database connect success")
+            return
+        time.sleep(1)
+    print("Connection database failed, exist")
+    sys.exit(10)
+
+
+def make_migrations():
+    print("Check database structure change ...")
+    print("Migrate model change to database ...")
+    subprocess.call('python3 manage.py migrate', shell=True)
+
+
+def prepare():
+    check_database_connection()
+    make_migrations()
+
+
 def parse_services(service):
     if service == 'all':
         return all_services
@@ -92,6 +115,7 @@ def is_running(service, unlink=True):
 
 def start_gunicorn():
     print("\n- Start Api Export Server")
+    prepare()
     service = 'gunicorn'
     bind = '{}:{}'.format(HTTP_HOST, HTTP_PORT)
     pid_file = get_pid_file_path(service)
